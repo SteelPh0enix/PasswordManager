@@ -9,6 +9,7 @@ python-dotenv = "*"
 wtforms = "*"
 autopep8 = "*"
 sqlalchemy = "*"
+cryptography = "*"
 
 [dev-packages]
 autopep8 = "*"
