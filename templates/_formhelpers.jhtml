@@ -1,16 +1,3 @@
-{# {% macro render_field(field) %}
-  <dt>{{ field.label }}
-  <dd>{{ field(**kwargs)|safe }}
-  {% if field.errors %}
-    <ul class=errors>
-    {% for error in field.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  </dd>
-{% endmacro %} #}
-
 {% macro render_field(field) %}
   <dt>{{ field.label }}</dt>
   <dd>{{ field(**kwargs)|safe }}
@@ -24,4 +11,11 @@
     </div>
   {% endif %}
   </dd>
+{% endmacro %}
+
+{% macro render_csrf(form) %}
+{{ form.csrf_token }}
+{% if form.csrf_token.errors %}
+  <div class="callout alert">You have submitted invalid CSRF token!</div>
+{% endif %}
 {% endmacro %}

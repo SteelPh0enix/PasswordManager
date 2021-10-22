@@ -1,8 +1,22 @@
 from wtforms import Form, StringField, PasswordField, RadioField, validators
+from wtforms.csrf.session import SessionCSRF
 from app_types import MasterPasswordStorageMethod
+from flask import session
+from app import app
 
 
-class RegistrationForm(Form):
+class BaseForm(Form):
+    class Meta:
+        csrf = True
+        csrf_class = SessionCSRF
+        csrf_secret = app.config['CSRF_SECRET_KEY']
+
+        @property
+        def csrf_context(self):
+            return session
+
+
+class RegistrationForm(BaseForm):
     username = StringField(
         'Username', [validators.DataRequired(), validators.Length(min=3, max=64)])
     password = PasswordField('Password', [
@@ -18,6 +32,6 @@ class RegistrationForm(Form):
     ])
 
 
-class LoginForm(Form):
+class LoginForm(BaseForm):
     username = StringField('Username', [validators.DataRequired()])
     password = PasswordField('Password', [validators.DataRequired()])

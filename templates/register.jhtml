@@ -1,5 +1,5 @@
 {% extends "base.jhtml" %}
-{% from "_formhelpers.jhtml" import render_field %}
+{% from "_formhelpers.jhtml" import render_field, render_csrf %}
 
 {% block page_title %}
 Password manager - Register
@@ -8,6 +8,7 @@ Password manager - Register
 {% block page_content %}
 <form method="post" action="/register">
     <dl>
+        {{ render_csrf(form) }}
         {{ render_field(form.username) }}
         {{ render_field(form.password) }}
         {{ render_field(form.confirm_password) }}
@@ -15,5 +16,5 @@ Password manager - Register
     </dl>
     <p><input type="submit" value="Register!" class="button expanded"/></p>
 </form>
-<a href="login">Already have an account? Log in!</a>
+<a href="/login">Already have an account? Log in!</a>
 {% endblock page_content %}

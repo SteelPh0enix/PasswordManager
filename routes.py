@@ -3,9 +3,9 @@ from forms import LoginForm, RegistrationForm
 from app import app
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def homepage():
-    return render_template('login.jhtml', form=LoginForm(request.form))
+    return redirect('/login')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -22,3 +22,7 @@ def login():
     if request.method == 'POST' and form.validate():
         return redirect('/')
     return render_template('login.jhtml', form=form)
+
+@app.route('/password_manager', methods=['GET'])
+def password_manager():
+    pass

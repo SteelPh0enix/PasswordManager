@@ -1,7 +1,4 @@
 from flask import Flask
-from dotenv import dotenv_values
-
-ENV_VARS = dotenv_values('.env')
 
 app = Flask(__name__,
             static_url_path='',
