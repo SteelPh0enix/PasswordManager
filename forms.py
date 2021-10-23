@@ -27,8 +27,8 @@ class RegistrationForm(BaseForm):
     confirm_password = PasswordField(
         'Repeat password', [validators.DataRequired()])
     password_storage_method = RadioField('Password storage method', [validators.DataRequired()], choices=[(
-        MasterPasswordStorageMethod.HASH, 'Salted hash'),
-        (MasterPasswordStorageMethod.HMAC, 'HMAC')
+        MasterPasswordStorageMethod.HASH.value, 'Salted hash'),
+        (MasterPasswordStorageMethod.HMAC.value, 'HMAC')
     ])
 
 

@@ -3,7 +3,7 @@
 {% from "_formhelpers.jhtml" import render_field, render_csrf %}
 
 {% block page_title %}
-Password manager - Login
+Password Manager - Login
 {% endblock page_title %}
 
 {% block page_content %}

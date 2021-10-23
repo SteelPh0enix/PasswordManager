@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class MasterPasswordStorageMethod(Enum):
+class MasterPasswordStorageMethod(IntEnum):
     HASH = 1,
     HMAC = 2

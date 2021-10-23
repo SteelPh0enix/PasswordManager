@@ -1,0 +1,9 @@
+{% extends "base.jhtml" %}
+{% from "_formhelpers.jhtml" import render_field, render_csrf %}
+
+{% block page_title %}
+Password Manager
+{% endblock page_title %}
+
+{% block page_content %}
+{% endblock page_content %}

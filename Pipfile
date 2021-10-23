@@ -9,6 +9,8 @@ wtforms = "*"
 autopep8 = "*"
 sqlalchemy = "*"
 cryptography = "*"
+flask-login = "*"
+flask-sqlalchemy = "*"
 
 [dev-packages]
 autopep8 = "*"
