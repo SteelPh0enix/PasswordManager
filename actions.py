@@ -1,3 +1,4 @@
+from typing import Tuple
 from database import PasswordEntry, User, db
 from app_types import MasterPasswordStorageMethod
 from enum import Enum
@@ -69,10 +70,10 @@ def register_user(username: str, password: str, security_type_value: int) -> Reg
     return RegisterError.OK
 
 
-def check_user_credentials(username: str, password: str) -> UserCredentialsError:
+def check_user_credentials(username: str, password: str) -> Tuple[UserCredentialsError, User]:
     user = User.query.filter_by(login=username).first()
     if user is None:
-        return UserCredentialsError.INVALID_USERNAME
+        return UserCredentialsError.INVALID_USERNAME, None
 
     encoded_password = password.encode('UTF-8')
     security_key = app.config['SECRET_KEY']
@@ -80,11 +81,11 @@ def check_user_credentials(username: str, password: str) -> UserCredentialsError
         encrypted_password = sec.secure_data_hmac(
             encoded_password, security_key)
         if user.password_hash != encrypted_password:
-            return UserCredentialsError.INVAID_PASSWORD
+            return UserCredentialsError.INVAID_PASSWORD, None
     elif user.password_security_method == int(MasterPasswordStorageMethod.HASH):
         if not sec.compare_data_encrypted_hash(encoded_password, user.password_hash, user.password_salt, security_key):
-            return UserCredentialsError.INVAID_PASSWORD
+            return UserCredentialsError.INVAID_PASSWORD, None
     else:
-        return UserCredentialsError.INVALID_SECURITY_METHOD
+        return UserCredentialsError.INVALID_SECURITY_METHOD, None
 
-    return UserCredentialsError.OK
+    return UserCredentialsError.OK, user

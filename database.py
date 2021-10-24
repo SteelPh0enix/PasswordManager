@@ -1,7 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 
 db = SQLAlchemy()
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'Users'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
@@ -18,6 +19,7 @@ class PasswordEntry(db.Model):
     __tablename__ = 'PasswordEntries'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    title = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=False)
     login = db.Column(db.String)

@@ -1,9 +1,34 @@
 {% extends "base.jhtml" %}
 {% from "_formhelpers.jhtml" import render_field, render_csrf %}
 
+{% macro render_password_entry(entry) %}
+
+{% endmacro %}
+
 {% block page_title %}
 Password Manager
 {% endblock page_title %}
 
 {% block page_content %}
+{% if password_list %}
+<table class="hover">
+
+</table>
+{% else %}
+<div class="callout primary">There are no passwords yet, add one!</div>
+{% endif %}
+<form method="post" action="/add_password">
+    <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+            {{ render_csrf(form) }}
+            {{ render_field(form.title) }}
+            {{ render_field(form.password) }}
+            {{ render_field(form.login) }}
+            {{ render_field(form.web_address) }}
+            {{ render_field(form.description) }}
+        </div>
+        <input type="submit" value="Add password!" class="button expanded"/>
+    </div>
+</form>
+<a href='/logout'>Logout!</a>
 {% endblock page_content %}
