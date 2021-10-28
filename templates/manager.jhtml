@@ -2,7 +2,20 @@
 {% from "_formhelpers.jhtml" import render_field, render_csrf %}
 
 {% macro render_password_entry(entry) %}
-
+<tr>
+    <td>{{ entry.title }}</td>
+    <td>
+        <button class="button primary" id="btn-show-pass-{{ entry.id }}" onClick="showPassword({{ entry.id }})">Show password</button>
+        <input type="hidden" id="pass-in-{{ entry.id }}">
+    </td>
+    <td>{{ entry.login }}</td>
+    <td>{{ entry.web_address }}</td>
+    <td>{{ entry.description }}</td>
+    <td>
+        {# <a class="button warning" id="btn-change-pass-{{ entry.id }}">Change password</button> #}
+        <a class="button alert" id="btn-delete-pass-{{ entry.id }}" href="/remove_password?id={{ entry.id }}">Delete entry</button>
+    </td>
+</tr>
 {% endmacro %}
 
 {% block page_title %}
@@ -12,7 +25,21 @@ Password Manager
 {% block page_content %}
 {% if password_list %}
 <table class="hover">
-
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Password</th>
+            <th>Login</th>
+            <th>Address</th>
+            <th>Description</th>
+            <th>Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in password_list %}
+            {{ render_password_entry(entry) }}
+        {% endfor %}
+    </tbody>
 </table>
 {% else %}
 <div class="callout primary">There are no passwords yet, add one!</div>
@@ -31,4 +58,31 @@ Password Manager
     </div>
 </form>
 <a href='/logout'>Logout!</a>
+
+<script type="text/javascript">
+    function showPassword(id) {
+        const query_string = '/get_password?id=' + id;
+        let req = new XMLHttpRequest();
+        req.open('GET', query_string, true);
+
+        req.onload = function (e) {
+            if (req.readyState === 4) {
+                if (req.status === 200) {
+                    const resp_text = req.responseText;
+                    const resp_json = JSON.parse(resp_text);
+
+                    if (resp_json.status === 'ok') {
+                        let pass_in = document.getElementById('pass-in-' + id);
+                        let button_show_pass = document.getElementById('btn-show-pass-' + id);
+                        button_show_pass.style.visibility = 'hidden';
+                        pass_in.value = resp_json.data;
+                        pass_in.type = 'text';
+                    }
+                }
+            }
+        }
+
+        req.send();
+    }
+</script>
 {% endblock page_content %}

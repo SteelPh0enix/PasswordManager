@@ -1,9 +1,10 @@
-from typing import Tuple
+from typing import Hashable, Tuple
 from database import PasswordEntry, User, db
 from app_types import MasterPasswordStorageMethod
 from enum import Enum
 import data_security as sec
 from app import app
+from hashlib import md5
 
 
 class RegisterError(Enum):
@@ -50,18 +51,15 @@ def register_user(username: str, password: str, security_type_value: int) -> Reg
     user = None
 
     if security_type == MasterPasswordStorageMethod.HMAC:
-        print('sec type: hmac')
         secured_password = sec.secure_data_hmac(encoded_password, security_key)
         user = User(login=username, password_hash=secured_password,
                     password_security_method=int(security_type))
     elif security_type == MasterPasswordStorageMethod.HASH:
-        print('sec type: hash')
         secured_password, password_salt = sec.secure_data_encrypted_hash(
             encoded_password, security_key)
         user = User(login=username, password_hash=secured_password,
                     password_salt=password_salt, password_security_method=int(security_type))
     else:
-        print('invalid sec type')
         return RegisterError.INVALID_SECURITY_METHOD
 
     db.session.add(user)
@@ -89,3 +87,44 @@ def check_user_credentials(username: str, password: str) -> Tuple[UserCredential
         return UserCredentialsError.INVALID_SECURITY_METHOD, None
 
     return UserCredentialsError.OK, user
+
+
+def add_password_entry(user: User, title: str, password: str, login: str, web_address: str, description: str):
+    encoded_user_password = user.password_hash
+    encoded_password = password.encode('UTF-8')
+    security_key = app.config['SECRET_KEY']
+
+    hasher = md5()
+    hasher.update(encoded_user_password)
+    hasher.update(security_key)
+    password_key = hasher.digest()
+
+    encrypted_password = sec.encrypt_data_aes(encoded_password, password_key)
+
+    entry = PasswordEntry(
+        title=title,
+        password=encrypted_password,
+        user_id=user.id,
+        login=login,
+        web_address=web_address,
+        description=description
+    )
+
+    db.session.add(entry)
+    db.session.commit()
+
+
+def get_password_entry(user: User, password_id: str) -> str:
+    password = PasswordEntry.query.filter_by(id=password_id, user_id=user.id).first()
+    if password is None:
+        return ''
+
+    encoded_user_password = user.password_hash
+    security_key = app.config['SECRET_KEY']
+
+    hasher = md5()
+    hasher.update(encoded_user_password)
+    hasher.update(security_key)
+    password_key = hasher.digest()
+
+    return sec.decrypt_data_aes(password.password, password_key)
