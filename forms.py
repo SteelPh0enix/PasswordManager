@@ -37,6 +37,7 @@ class LoginForm(BaseForm):
     username = StringField('Username', [validators.DataRequired()])
     password = PasswordField('Password', [validators.DataRequired()])
 
+
 class PasswordEntryForm(BaseForm):
     title = StringField('Title', [validators.DataRequired()])
     password = PasswordField('Password', [validators.DataRequired()])

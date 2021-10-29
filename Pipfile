@@ -11,6 +11,7 @@ sqlalchemy = "*"
 cryptography = "*"
 flask-login = "*"
 flask-sqlalchemy = "*"
+colorama = "*"
 
 [dev-packages]
 autopep8 = "*"

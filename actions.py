@@ -115,7 +115,8 @@ def add_password_entry(user: User, title: str, password: str, login: str, web_ad
 
 
 def get_password_entry(user: User, password_id: str) -> str:
-    password = PasswordEntry.query.filter_by(id=password_id, user_id=user.id).first()
+    password = PasswordEntry.query.filter_by(
+        id=password_id, user_id=user.id).first()
     if password is None:
         return ''
 
