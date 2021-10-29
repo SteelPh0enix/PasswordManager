@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, sessions, url_for, flash
 from flask_login.utils import login_required, logout_user
 from database import PasswordEntry, db
-from forms import LoginForm, RegistrationForm, PasswordEntryForm
+from forms import ChangePasswordForm, LoginForm, RegistrationForm, PasswordEntryForm
 from app import app
 import actions
 from flask_login import login_user, current_user
@@ -72,7 +72,7 @@ def logout():
 def add_password():
     form = PasswordEntryForm(request.form)
     if form.validate():
-        actions.add_password_entry(
+        actions.add_wallet_password_entry(
             current_user,
             form.title.data,
             form.password.data,
@@ -91,11 +91,11 @@ def remove_password():
     try:
         id_validated = int(password_id)
     except ValueError:
-        flash('Invalid ID!')
+        flash('Invalid ID!', 'alert')
         return redirect(url_for('password_manager'))
 
     password_entry = PasswordEntry.query.filter_by(
-        id=password_id, user_id=current_user.id).first()
+        id=id_validated, user_id=current_user.id).first()
 
     if password_entry is not None:
         db.session.delete(password_entry)
@@ -115,21 +115,29 @@ def get_password():
     try:
         id_validated = int(password_id)
     except ValueError:
-        flash('Invalid ID!')
+        flash('Invalid ID!', 'alert')
         return redirect(url_for('password_manager'))
 
     password_entry = PasswordEntry.query.filter_by(
-        id=password_id, user_id=current_user.id).first()
+        id=id_validated, user_id=current_user.id).first()
 
     # Decrypt the password
     if password_entry is not None:
-        decrypted_password = actions.get_password_entry(
+        decrypted_password = actions.get_wallet_password_entry(
             current_user, password_id)
         return {'status': 'ok', 'data': decrypted_password.decode('UTF-8')}
     return {'status': 'error'}
 
 
-@app.route('/change_user_password', methods=['POST'])
+@app.route('/change_user_password', methods=['GET', 'POST'])
 @login_required
 def change_user_password():
-    pass
+    form = ChangePasswordForm(request.form)
+    if request.method == 'POST' and form.validate():
+        if actions.change_user_password(current_user.id, form.old_password.data, form.new_password.data):
+            flash('Password changed successfully, log in again!', 'success')
+            return redirect(url_for('logout'))
+        else:
+            flash('Couldn\'t change the password! Check if the old password is correct and try again!', 'alert')
+    
+    return render_template('change_password.jhtml', form=form)

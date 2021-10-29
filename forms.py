@@ -44,3 +44,14 @@ class PasswordEntryForm(BaseForm):
     login = StringField('Login')
     web_address = StringField('URL')
     description = TextField('Description')
+
+
+class ChangePasswordForm(BaseForm):
+    old_password = PasswordField('Old password', [validators.DataRequired()])
+    new_password = PasswordField('Password', [
+        validators.DataRequired(),
+        validators.Length(min=6),
+        validators.EqualTo('repeat_new_password', message='New passwords must match!')
+    ])
+    repeat_new_password = PasswordField(
+        'Confirm new password', [validators.DataRequired()])

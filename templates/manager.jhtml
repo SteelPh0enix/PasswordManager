@@ -57,7 +57,8 @@ Password Manager
         <input type="submit" value="Add password!" class="button expanded"/>
     </div>
 </form>
-<a href='/logout'>Logout!</a>
+<a href="/logout" class="button alert">Logout!</a>
+<a href="/change_user_password" class="button warning">Change password</a>
 
 <script type="text/javascript">
     function showPassword(id) {

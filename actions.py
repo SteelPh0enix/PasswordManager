@@ -1,3 +1,4 @@
+from re import A
 from typing import Hashable, Tuple
 from database import PasswordEntry, User, db
 from app_types import MasterPasswordStorageMethod
@@ -40,8 +41,6 @@ class UserCredentialsError(Enum):
 
 def register_user(username: str, password: str, security_type_value: int) -> RegisterError:
     security_type = MasterPasswordStorageMethod(security_type_value)
-    print('Registering user {0} with security type {1}'.format(
-        username, security_type))
     existing_user = User.query.filter_by(login=username).first()
     if existing_user is not None:
         return RegisterError.USER_ALREADY_EXISTS
@@ -75,6 +74,7 @@ def check_user_credentials(username: str, password: str) -> Tuple[UserCredential
 
     encoded_password = password.encode('UTF-8')
     security_key = app.config['SECRET_KEY']
+
     if user.password_security_method == int(MasterPasswordStorageMethod.HMAC):
         encrypted_password = sec.secure_data_hmac(
             encoded_password, security_key)
@@ -89,17 +89,24 @@ def check_user_credentials(username: str, password: str) -> Tuple[UserCredential
     return UserCredentialsError.OK, user
 
 
-def add_password_entry(user: User, title: str, password: str, login: str, web_address: str, description: str):
-    encoded_user_password = user.password_hash
-    encoded_password = password.encode('UTF-8')
+def create_wallet_password_key(user_password: bytes):
     security_key = app.config['SECRET_KEY']
 
     hasher = md5()
-    hasher.update(encoded_user_password)
+    hasher.update(user_password)
     hasher.update(security_key)
-    password_key = hasher.digest()
+    return hasher.digest()
 
-    encrypted_password = sec.encrypt_data_aes(encoded_password, password_key)
+
+def encode_wallet_password_entry(password: bytes, user_password: bytes):
+    password_key = create_wallet_password_key(user_password)
+    return sec.encrypt_data_aes(password, password_key)
+
+
+def add_wallet_password_entry(user: User, title: str, password: str, login: str, web_address: str, description: str):
+    encoded_password = password.encode('UTF-8')
+
+    encrypted_password = encode_wallet_password_entry(encoded_password, user.password_hash)
 
     entry = PasswordEntry(
         title=title,
@@ -114,18 +121,56 @@ def add_password_entry(user: User, title: str, password: str, login: str, web_ad
     db.session.commit()
 
 
-def get_password_entry(user: User, password_id: str) -> str:
+def get_wallet_password_entry(user: User, password_id: str) -> str:
     password = PasswordEntry.query.filter_by(
         id=password_id, user_id=user.id).first()
     if password is None:
         return ''
 
-    encoded_user_password = user.password_hash
-    security_key = app.config['SECRET_KEY']
-
-    hasher = md5()
-    hasher.update(encoded_user_password)
-    hasher.update(security_key)
-    password_key = hasher.digest()
+    password_key = create_wallet_password_key(user.password_hash)
 
     return sec.decrypt_data_aes(password.password, password_key)
+
+
+def re_encode_password_entries(user_id: int, old_user_password: bytes, new_user_password: bytes):
+    user_wallet_passwords = PasswordEntry.query.filter_by(user_id=user_id)
+    old_password_key = create_wallet_password_key(old_user_password)
+    new_password_key = create_wallet_password_key(new_user_password)
+
+    for entry in user_wallet_passwords:
+        decrypted_password = sec.decrypt_data_aes(entry.password, old_password_key)
+        entry.password = sec.encrypt_data_aes(decrypted_password, new_password_key)
+
+
+def change_user_password(user_id: int, old_password: str, new_password: str) -> bool:
+    user = User.query.filter_by(id=user_id).first()
+
+    print('Found user {}'.format(user))
+    print('Old pass: {}, new pass: {}'.format(old_password, new_password))
+
+    if user is None or check_user_credentials(user.login, old_password)[0] != UserCredentialsError.OK:
+        return False
+
+    # Old password is OK, so let's change it
+    old_user_password = user.password_hash
+    password_security_type = MasterPasswordStorageMethod(
+        user.password_security_method)
+    new_password_encoded = new_password.encode('UTF-8')
+    security_key = app.config['SECRET_KEY']
+
+    if password_security_type == MasterPasswordStorageMethod.HMAC:
+        encrypted_password = sec.secure_data_hmac(
+            new_password_encoded, security_key)
+        user.password_hash = encrypted_password
+    elif password_security_type == MasterPasswordStorageMethod.HASH:
+        encrypted_password, password_salt = sec.secure_data_encrypted_hash(
+            new_password_encoded, security_key)
+        user.password_hash = encrypted_password
+        user.password_salt = password_salt
+    else:
+        return False
+
+    re_encode_password_entries(user_id, old_user_password, user.password_hash)
+    db.session.commit()
+
+    return True
