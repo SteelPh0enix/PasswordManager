@@ -123,7 +123,8 @@ def get_password():
 
     # Decrypt the password
     if password_entry is not None:
-        decrypted_password = actions.get_password_entry(current_user, password_id)
+        decrypted_password = actions.get_password_entry(
+            current_user, password_id)
         return {'status': 'ok', 'data': decrypted_password.decode('UTF-8')}
     return {'status': 'error'}
 
