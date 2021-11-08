@@ -1,6 +1,6 @@
 from wtforms import Form, StringField, PasswordField, RadioField, validators
 from wtforms.csrf.session import SessionCSRF
-from wtforms.fields.simple import TextField
+from wtforms.fields.simple import StringField
 from app_types import MasterPasswordStorageMethod
 from flask import session
 from app import app
@@ -43,7 +43,7 @@ class PasswordEntryForm(BaseForm):
     password = PasswordField('Password', [validators.DataRequired()])
     login = StringField('Login')
     web_address = StringField('URL')
-    description = TextField('Description')
+    description = StringField('Description')
 
 
 class ChangePasswordForm(BaseForm):
@@ -51,7 +51,8 @@ class ChangePasswordForm(BaseForm):
     new_password = PasswordField('Password', [
         validators.DataRequired(),
         validators.Length(min=6),
-        validators.EqualTo('repeat_new_password', message='New passwords must match!')
+        validators.EqualTo('repeat_new_password',
+                           message='New passwords must match!')
     ])
     repeat_new_password = PasswordField(
         'Confirm new password', [validators.DataRequired()])
