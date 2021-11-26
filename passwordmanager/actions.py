@@ -1,10 +1,10 @@
 from re import A
 from typing import Hashable, Tuple
-from database import PasswordEntry, User, db
-from app_types import MasterPasswordStorageMethod
+from .database import PasswordEntry, User, db
+from .app_types import MasterPasswordStorageMethod
 from enum import Enum
-import data_security as sec
-from app import app
+from passwordmanager import data_security as sec
+from passwordmanager import app
 from hashlib import md5
 
 

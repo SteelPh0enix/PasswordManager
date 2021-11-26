@@ -1,9 +1,9 @@
 from flask import render_template, request, redirect, sessions, url_for, flash
 from flask_login.utils import login_required, logout_user
-from database import PasswordEntry, db
-from forms import ChangePasswordForm, LoginForm, RegistrationForm, PasswordEntryForm
-from app import app
-import actions
+from .database import PasswordEntry, db
+from .forms import ChangePasswordForm, LoginForm, RegistrationForm, PasswordEntryForm
+from passwordmanager import app
+from passwordmanager import actions
 from flask_login import login_user, current_user
 
 

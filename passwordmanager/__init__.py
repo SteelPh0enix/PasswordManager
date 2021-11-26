@@ -1,5 +1,5 @@
 from flask import Flask
-from database import db, User
+from .database import db, User
 from flask_login import LoginManager
 
 app = Flask(__name__,
@@ -20,4 +20,4 @@ with app.app_context():
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
 
-import routes
+from . import routes

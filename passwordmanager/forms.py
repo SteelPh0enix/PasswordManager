@@ -1,9 +1,9 @@
 from wtforms import Form, StringField, PasswordField, RadioField, validators
 from wtforms.csrf.session import SessionCSRF
 from wtforms.fields.simple import StringField
-from app_types import MasterPasswordStorageMethod
+from .app_types import MasterPasswordStorageMethod
 from flask import session
-from app import app
+from passwordmanager import app
 
 
 class BaseForm(Form):
