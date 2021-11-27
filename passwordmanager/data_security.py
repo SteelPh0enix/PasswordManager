@@ -34,6 +34,7 @@ def secure_data_hash(data: bytes, salt: bytes = None) -> Tuple[bytes, bytes]:
     Returns:
         Tuple[bytes, bytes]: Pair of data hash and the salt
     """
+
     if salt is None or len(salt) != 16:
         salt = secrets.token_bytes(16)
 
